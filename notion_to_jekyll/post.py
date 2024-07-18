@@ -8,6 +8,7 @@ from urllib.request import urlretrieve
 
 from notion_to_jekyll import fs
 from notion_to_jekyll import util
+from notion_to_jekyll import notion_api
 
 # Download page as markdown file
 def download_markdown(post_id):
@@ -99,7 +100,7 @@ def rss_tags(post):
 	tags = []
 	
 	for tag in post["properties"]["Tags"]["multi_select"]:
-		tags += tag["name"]
+		tags += [tag["name"]]
 
 	return str(tags)
 
@@ -171,61 +172,100 @@ def render_math(markdown_text):
 
 	return has_math, markdown_text
 
-def format_images(short_name, markdown_text, encode_jpg, rename_images):
+def convert_jpg(short_name, path, filename):
+	from PIL import Image
+
+	# Open image with pillow and convert to rgb
+	im = Image.open(path)
+	rgb_im = im.convert('RGB')
+
+	# Save path of image before conversion
+	previous_image = path
+
+	# Get new filename
+	filename = ".".join(filename.split(".")[:-1]) + ".jpg"
+	path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
+
+	# Save image as jpg with 99% quality
+	util.logger.debug(f"Saving encoded image as {path}")
+	rgb_im.save(path, quality=99)
+
+	# Delete image
+	os.remove(previous_image)
+
+	return path, filename
+
+def rename_image_to_hash(short_name, path, filename):
+	import hashlib
+
+	# Hash image usign MD5
+	image_hash = hashlib.md5(
+		open(path,'rb').read()
+	).hexdigest()
+
+	# Use it as filename
+	filename = image_hash + ".jpg"
+	output_path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
+	
+	util.logger.debug(f"Renaming image to {output_path}")
+	os.rename(path, output_path)
+
+	return output_path, filename
+
+def get_image_name_notion(page_images, image_n):
+	image = page_images[image_n]["image"]
+
+	if image["caption"]:
+		return image["caption"][0]["plain_text"]
+
+	return "Image illustrating the blog post."
+
+def format_images(post_id, short_name, markdown_text, encode_jpg, rename_images):
+	# Set image counter to 0
+	global image_n
+	image_n = 0
+	# Get images from post
+	global page_images
+	page_images = notion_api.get_images(post_id)
+
 	def replace_path(match):
+		# Get image number variable
+		global image_n
+		global page_images
+
+		image_name = match.group(1)
 		filename = match.group(2)
 		path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 
 		if encode_jpg:
-			# Open image with pillow and convert to rgb
-			from PIL import Image
-			im = Image.open(path)
-			rgb_im = im.convert('RGB')
+			path, filename = convert_jpg(short_name, path, filename)
 
-			# Save path of image before conversion
-			previous_image = path
+		if rename_images:
+			path, filename = rename_image_to_hash(short_name, path, filename)
 
-			# Get new filename
-			filename = ".".join(filename.split(".")[:-1]) + ".jpg"
-			path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
+		image_name = get_image_name_notion(page_images, image_n)
 
-			# Save image as jpg with 99% quality
-			util.logger.debug(f"Saving encoded image as {path}")
-			rgb_im.save(path, quality=99)
+		# Increment image counter by 1
+		image_n += 1
 
-			# Delete image
-			os.remove(previous_image)
-
-		if rename_images:		
-			import hashlib
-			# Hash image usign MD5
-			image_hash = hashlib.md5(
-				open(path,'rb').read()
-			).hexdigest()
-			# Use it as filename
-			filename = image_hash + ".jpg"
-			output_path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
-			util.logger.debug(f"Renaming image to {output_path}")
-			os.rename(path, output_path)
-
-		util.logger.debug(f"Changing image tag for: {match.group(1)}(/assets/{short_name}/{filename})")
-		return f"{match.group(1)}(/assets/{short_name}/{filename})"
+		util.logger.debug(f"Changing image tag for: ![{image_name}](/assets/{short_name}/{filename})")
+		return f"![{image_name}](/assets/{short_name}/{filename})"
 
 	util.logger.info("Replacing image tags in markdown with correct paths.")
 	if encode_jpg:
 		util.logger.info("Encode images to jpg.")
 	if rename_images:
 		util.logger.info("Rename image to it's hash.")
-
+	
 	markdown_text = re.sub(
-		r"(\!\[.*?\])\((.*)\)",
+		r"\!\[(.*?)\]\((.*)\)",
 		replace_path,
 		markdown_text
 	)
 
 	return markdown_text
 
-def format_page(post, short_name, publish_time, filename, use_katex, encode_jpg, rename_images):
+def format_page(post_id, post, short_name, publish_time, filename, use_katex, encode_jpg, rename_images):
 	# Read file
 	markdown_text = ""
 	util.logger.debug("Reading .md file.")
@@ -233,7 +273,7 @@ def format_page(post, short_name, publish_time, filename, use_katex, encode_jpg,
 		markdown_text = f.read()
 
 	# Replace MD image tags with correct filename
-	markdown_text = format_images(short_name, markdown_text, encode_jpg, rename_images)
+	markdown_text = format_images(post_id, short_name, markdown_text, encode_jpg, rename_images)
 	util.PBAR.update()
 
 	# Ensure correct math rendering with katex
@@ -288,7 +328,7 @@ def export_page(post_id, post, use_katex, encode_jpg, rename_images):
 	move_assets(short_name)
 	util.PBAR.update()
 
-	format_page(post, short_name, publish_time, filename, use_katex, encode_jpg, rename_images)
+	format_page(post_id, post, short_name, publish_time, filename, use_katex, encode_jpg, rename_images)
 
 	fs.copy_post_to_blog(short_name, publish_time)
 	util.PBAR.update()
