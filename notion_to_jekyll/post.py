@@ -233,8 +233,12 @@ def format_images(post_id, short_name, markdown_text, encode_jpg, rename_images)
 		global image_n
 		global page_images
 
+		# Get matches
 		image_name = match.group(1)
 		filename = match.group(2)
+		after = match.group(3)
+		caption = match.group(4)
+
 		path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 
 		if encode_jpg:
@@ -249,7 +253,12 @@ def format_images(post_id, short_name, markdown_text, encode_jpg, rename_images)
 		image_n += 1
 
 		util.logger.debug(f"Changing image tag for: ![{image_name}](/assets/{short_name}/{filename})")
-		return f"![{image_name}](/assets/{short_name}/{filename})"
+		
+		# Check if the text below the image is the caption as output by notion
+		if image_name == caption:
+			return f"![{image_name}](/assets/{short_name}/{filename})"
+		
+		return f"![{image_name}](/assets/{short_name}/{filename}){after}"
 
 	util.logger.info("Replacing image tags in markdown with correct paths.")
 	if encode_jpg:
@@ -258,7 +267,7 @@ def format_images(post_id, short_name, markdown_text, encode_jpg, rename_images)
 		util.logger.info("Rename image to it's hash.")
 	
 	markdown_text = re.sub(
-		r"\!\[(.*?)\]\((.*)\)",
+		r"\!\[([^\]]+)\]\(([^\)]+)\)(\n\n([^\n]+))?",
 		replace_path,
 		markdown_text
 	)
