@@ -20,7 +20,7 @@ from notion_to_jekyll import util
 @click.option('--encode-jpg', is_flag=True, help="Encode all images as jpg.", default=True, type=bool)
 @click.option('--rename-images', is_flag=True, help="Rename images to hash of contents.", default=True, type=bool)
 def cli(
-	notion_token, db_id, log_token, 
+	notion_token, db_id, log, 
 	assets_folder, output_folder,
 	download_all, update_time, 
 	use_katex, encode_jpg, rename_images # options for export_page
@@ -36,8 +36,8 @@ def cli(
 		notion_token = os.environ["NOTION_TOKEN"]
 		db_id = os.environ["DB_ID"]
 
-	if log_token:
-		log_token = os.environ["LOGSNAG_TOKEN"]
+	if log:
+		log = os.environ["LOGSNAG_TOKEN"]
 
 	# Set dirs
 	if assets_folder:
@@ -69,7 +69,7 @@ def cli(
 		deleted = fs.clean_folders(posts)
 
 		# Log updates to logsnag
-		util.log_new(new, updated, deleted, log_token)
+		util.log_new(new, updated, deleted, log)
 	except Exception as e:
 		util.logger.error(f"Error occured while exporting posts: {e}...")
 		raise e
