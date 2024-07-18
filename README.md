@@ -50,7 +50,7 @@ Either call `notion-to-jekyll --help` or see the following table for **optional*
 #### Arguments to add logging
 | Option | Usage |
 |-	|-	|
-| `--log-token`	| Logsnag token, to log the updated posts.	|
+| `--log`	| Log updated posts to Logsnag, expects LOGSNAG_TOKEN env var.	|
 
 #### Arguments to add logging
 | Option | Usage |

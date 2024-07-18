@@ -87,7 +87,7 @@ def log_new(new, updated, deleted, token):
 	def log_update(event, description, icon):
 		logger.info(f"{icon} {event} - {description}")
 
-		if token != "none":
+		if token:
 			send_notification(event, description, icon, token)
 
 		return

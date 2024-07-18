@@ -11,7 +11,7 @@ from notion_to_jekyll import util
 @click.command()
 @click.option('--notion-token', help="Notion API token.", required=False, type=str)
 @click.option('--db-id', help="Notion DB id.", required=False, type=str)
-@click.option('--log-token', help="Logsnag token.", default="none", type=str)
+@click.option('--log', help="Log updated posts to Logsnag.", is_flag=True, default=False, type=bool)
 @click.option('--assets-folder', help="Folder in which to store assets.", required=False, type=str)
 @click.option('--output-folder', help="Folder in which to store the posts.", required=False, type=str)
 @click.option('--download-all', is_flag=True, help="Download all posts.", default=False)
@@ -35,6 +35,9 @@ def cli(
 		load_dotenv(os.path.join(os.getcwd(), ".env"))
 		notion_token = os.environ["NOTION_TOKEN"]
 		db_id = os.environ["DB_ID"]
+
+	if log_token:
+		log_token = os.environ["LOGSNAG_TOKEN"]
 
 	# Set dirs
 	if assets_folder:
