@@ -62,7 +62,7 @@ def cli(
 			util.MANAGER = enlighten.get_manager()
 			util.PBAR = util.MANAGER.counter(total=8, desc=f'Exporting post {name}:', unit='steps')
 
-			util.logger.info(f"{index}/{len(to_download)} - Exporting {name} to Jekyll.")
+			util.logger.info(f"{index+1}/{len(to_download)} - Exporting {name} to Jekyll.")
 			post.export_page(post_id, p, use_katex, encode_jpg, rename_images)
 
 		# Delete any posts that have been removed

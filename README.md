@@ -73,6 +73,83 @@ Either call `notion-to-jekyll --help` or see the following table for **optional*
 | `--encode-jpg`	| Encode images as jpgs.	|
 | `--rename-images`	| Rename images to a hash of their content.	|
 
+## Example run
+
+```
+Starting Notion to Jekyll Exporter...
+Loading secrets from the environment variables.
+Found 5 blog posts to publish.
+Downloading all posts.
+
+1/5 - Exporting created-blog to Jekyll.
+Downloading markdown from Notion.
+Unzipping file...
+Replacing image tags in markdown with correct paths.
+Encode images to jpg.
+Rename image to it's hash.
+Downloading emoji as favicon: 📟
+Inserting jekyll metadata.
+Output formatted markdown file.
+
+Exporting post created-blog: 100%|███████████████████████| 8/8 [00:06<00:00, 1.45 steps/s]
+
+2/5 - Exporting reverse-engineering-diploma to Jekyll.
+Downloading markdown from Notion.
+Unzipping file...
+Replacing image tags in markdown with correct paths.
+Encode images to jpg.
+Rename image to it's hash.
+Formatting inline equations.
+Downloading preview image from Notion.
+Downloading emoji as favicon: 🔐
+Inserting jekyll metadata.
+Output formatted markdown file.
+
+Exporting post reverse-engineering-diploma: 100%|███████████████████████| 8/8 [00:06<00:00, 1.45 steps/s]
+
+
+3/5 - Exporting nyt-connections to Jekyll.
+Downloading markdown from Notion.
+Unzipping file...
+Replacing image tags in markdown with correct paths.
+Encode images to jpg.
+Rename image to it's hash.
+Downloading preview image from Notion.
+Downloading emoji as favicon: 🧩
+Inserting jekyll metadata.
+Output formatted markdown file.
+
+Exporting post nyt-connections: 100%|███████████████████████| 8/8 [00:06<00:00, 1.45 steps/s]
+
+4/5 - Exporting skiing-ai to Jekyll.
+Downloading markdown from Notion.
+Unzipping file...
+Replacing image tags in markdown with correct paths.
+Encode images to jpg.
+Rename image to it's hash.
+Downloading preview image from Notion.
+Downloading emoji as favicon: 🎿
+Inserting jekyll metadata.
+Output formatted markdown file.
+
+Exporting post skiing-ai: 100%|███████████████████████| 8/8 [00:06<00:00, 1.45 steps/s]                                               
+5/5 - Exporting chess-engine to Jekyll.
+Downloading markdown from Notion.
+Unzipping file...
+Replacing image tags in markdown with correct paths.
+Encode images to jpg.
+Rename image to it's hash.
+Downloading preview image from Notion.
+Downloading emoji as favicon: ♟
+Inserting jekyll metadata.
+Output formatted markdown file.
+
+Exporting post chess-engine: 100%|███████████████████████| 8/8 [00:06<00:00, 1.45 steps/s]
+
+
+Finished exporting posts from Notion to Jekyll.
+```
+
 ## Acknowledgments
 
 This could not have been possible without the great [notion2md](https://github.com/echo724/notion2md) library.
