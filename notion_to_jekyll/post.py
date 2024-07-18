@@ -95,6 +95,14 @@ def fetch_favicon(post, short_name):
 def format_tags(post):
 	return str(post["properties"]["Tags"]["multi_select"])
 
+def rss_tags(post):
+	tags = []
+	
+	for tag in post["properties"]["Tags"]["multi_select"]:
+		tags += tag["name"]
+
+	return str(tags)
+
 # Check if the post has the tag "Short"
 def check_short(post):
 	tags = post["properties"]["Tags"]["multi_select"]
@@ -240,7 +248,8 @@ def format_page(post, short_name, publish_time, filename, use_katex, encode_jpg,
 		"title": f'"{post["properties"]["Name"]["title"][0]["text"]["content"]}"',
 		"time": get_words(markdown_text),
 		"published": publish_time,
-		"tags": format_tags(post),
+		"colortags": format_tags(post),
+		"tags": rss_tags(post),
 		"permalink": short_name,
 		"image": os.path.join(util.ASSETS, short_name, fetch_previewimage(post, short_name)),
 		"favicon": fetch_favicon(post, short_name),
