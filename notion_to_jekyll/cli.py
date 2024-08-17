@@ -15,14 +15,13 @@ from notion_to_jekyll import util
 @click.option('--assets-folder', help="Folder in which to store assets.", required=False, type=str)
 @click.option('--output-folder', help="Folder in which to store the posts.", required=False, type=str)
 @click.option('--download-all', is_flag=True, help="Download all posts.", default=False)
-@click.option('--update-time', help="Download only posts newer than t seconds.", default=25*60*60, type=int)
 @click.option('--use-katex', is_flag=True, help="Use Katex to render math.", default=True, type=bool)
 @click.option('--encode-jpg', is_flag=True, help="Encode all images as jpg.", default=True, type=bool)
 @click.option('--rename-images', is_flag=True, help="Rename images to hash of contents.", default=True, type=bool)
 def cli(
 	notion_token, db_id, log, 
 	assets_folder, output_folder,
-	download_all, update_time, 
+	download_all,
 	use_katex, encode_jpg, rename_images # options for export_page
 ):
 	util.configure_logger()
@@ -54,7 +53,7 @@ def cli(
 		posts = notion_api.fetch_all_posts(notion_token, db_id)
 		posts = notion_api.filter_posts(posts)
 
-		to_download, updated, new = util.check_posts(posts, download_all, update_time)
+		to_download, updated, new = util.check_posts(posts, download_all)
 
 		for index, (post_id, p) in enumerate(to_download):
 			name = p["properties"]["short-name"]["rich_text"][0]["text"]["content"]
@@ -70,6 +69,7 @@ def cli(
 
 		# Log updates to logsnag
 		util.log_new(new, updated, deleted, log)
+		notion_api.store_last_updated(to_download)
 	except Exception as e:
 		util.logger.error(f"Error occured while exporting posts: {e}...")
 		raise e

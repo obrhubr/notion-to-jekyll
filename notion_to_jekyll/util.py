@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import sys
 
@@ -24,15 +24,21 @@ POSTS = "_posts"
 MANAGER = None
 PBAR = None
 
-def get_time_since_edit(page):
-	# get time when page was last edited
-	edited_time = datetime.strptime(page['last_edited_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
-	
-	time_delta = datetime.now() - edited_time
+def get_last_edit_time(page):
+	# get time when page was last edited with utc timezone
+	return datetime.strptime(page['last_edited_time'], '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc)
 
-	return time_delta.total_seconds()
+def get_last_download_time(page):
+	# get time when page was last downloaded
+	properties = page['properties']
+	if 'last_downloaded' in properties and properties['last_downloaded']['date']:
+		return datetime.fromisoformat(properties['last_downloaded']['date']['start'])
+	else:
+		# If it has not been downloaded yet, set time to 0 to force update
+		current_timezone = datetime.now(timezone.utc).astimezone().tzinfo
+		return datetime.fromtimestamp(0, tz=current_timezone)
 
-def check_posts(posts, download_all, update_time):
+def check_posts(posts, download_all):
 	to_download = []
 	current_posts = fs.get_assets_folders()
 
@@ -45,14 +51,18 @@ def check_posts(posts, download_all, update_time):
 		# If all posts should be downloaded
 		if download_all:
 			to_download += [(post_id, p)]
-		else:
-			if not name in current_posts:
-				new += [name]
-				to_download += [(post_id, p)]
-			# Default: if the post has been edited in the last 25 hours, download it
-			elif get_time_since_edit(p) < update_time:
-				updated += [name]
-				to_download += [(post_id, p)]
+			continue
+
+		# If the post has not been downloaded at all yet
+		if not name in current_posts:
+			new += [name]
+			to_download += [(post_id, p)]
+			continue
+
+		# If the post has been updated since it has been last downloaded
+		if get_last_edit_time(p) > get_last_download_time(p):
+			updated += [name]
+			to_download += [(post_id, p)]
 
 	if download_all:
 		logger.info("Downloading all posts.")

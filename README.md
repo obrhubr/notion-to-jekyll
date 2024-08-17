@@ -2,6 +2,8 @@
 
 This script was written for my blog [obrhubr.org](https://obrhubr.org). I use a Github Action that runs daily which downloads the posts from Notion and updates my Github Pages site.
 
+It only downloads a post if it has been updated since it has been last downloaded.
+
 In order for this to work you will need to have a database in your Notion which contains the following attributes: (be careful, these are case-sensitive)
  - `Tags` (Multi-Select)
  - `Blog` (Multi-Select with either `Preview` or `Publish`)
@@ -10,6 +12,7 @@ In order for this to work you will need to have a database in your Notion which 
  - `preview-image` (Image)
  - `short-name` (Text)
  - `sourcecode` (Text)
+ - `last_downloaded` (Date)
 
 The post will only be published if the `Blog` attribute is set to `Publish`.
 
@@ -25,7 +28,7 @@ Download this repository and run
 pip install .
 ```
 
-You will no be able to call `notion-to-jekyll` from anywhere.
+You will now be able to call `notion-to-jekyll` from anywhere.
 
 ## Usage
 
@@ -63,7 +66,6 @@ Either call `notion-to-jekyll --help` or see the following table for **optional*
 | Option | Usage |
 |-	|-	|
 | `--download-all` | Download all posts.	|
-| `--update-time`	| Download only posts that have been updated in the last *t* seconds. |
 
 #### Arguments that affect markdown formatting
 

@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = "0.0.0"
+VERSION = "0.1.0"
 
 setup(
     name="notion-to-jekyll",

@@ -1,4 +1,5 @@
 from notion_client import Client
+from datetime import datetime, timezone
 
 from notion_to_jekyll import util
 
@@ -53,3 +54,19 @@ def get_images(page_id):
 			image_blocks += [block]
 
 	return image_blocks
+
+def store_last_updated(updated_posts):
+	current_timezone = datetime.now(timezone.utc).astimezone().tzinfo
+	
+	for post_id, _ in updated_posts:
+		# Update the last downloaded value in Notion table
+		NOTION_CLIENT.pages.update(
+			page_id=post_id, 
+			properties={
+				"last_downloaded": {
+					"date": {
+						"start": datetime.now(current_timezone).isoformat()
+					}
+				}
+			}
+		)
