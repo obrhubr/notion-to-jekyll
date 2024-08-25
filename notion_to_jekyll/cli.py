@@ -15,14 +15,16 @@ from notion_to_jekyll import util
 @click.option('--assets-folder', help="Folder in which to store assets.", required=False, type=str)
 @click.option('--output-folder', help="Folder in which to store the posts.", required=False, type=str)
 @click.option('--download-all', is_flag=True, help="Download all posts.", default=False)
+@click.option('--download-id', help="Download post with specific id.", default=None, type=str)
 @click.option('--use-katex', is_flag=True, help="Use Katex to render math.", default=True, type=bool)
-@click.option('--encode-jpg', is_flag=True, help="Encode all images as jpg.", default=True, type=bool)
+@click.option('--encode-images', is_flag=True, help="Encode all images as jpg.", default=True, type=bool)
 @click.option('--rename-images', is_flag=True, help="Rename images to hash of contents.", default=True, type=bool)
+@click.option('--dst-extension', help="The image extension to convert to.", default="webp", type=str)
 def cli(
 	notion_token, db_id, log, 
 	assets_folder, output_folder,
-	download_all,
-	use_katex, encode_jpg, rename_images # options for export_page
+	download_all, download_id,
+	use_katex, encode_images, rename_images, dst_extension # options for export_page
 ):
 	util.configure_logger()
 	util.logger.info("Starting Notion to Jekyll Exporter...")
@@ -53,7 +55,10 @@ def cli(
 		posts = notion_api.fetch_all_posts(notion_token, db_id)
 		posts = notion_api.filter_posts(posts)
 
-		to_download, updated, new = util.check_posts(posts, download_all)
+		if download_id:
+			to_download, updated, new = util.get_post_id(posts, download_id)
+		else:
+			to_download, updated, new = util.check_posts(posts, download_all)
 
 		for index, (post_id, p) in enumerate(to_download):
 			name = p["properties"]["short-name"]["rich_text"][0]["text"]["content"]
@@ -62,7 +67,7 @@ def cli(
 			util.PBAR = util.MANAGER.counter(total=8, desc=f'Exporting post {name}:', unit='steps')
 
 			util.logger.info(f"{index+1}/{len(to_download)} - Exporting {name} to Jekyll.")
-			post.export_page(post_id, p, use_katex, encode_jpg, rename_images)
+			post.export_page(post_id, p, use_katex, encode_images, rename_images, dst_extension)
 
 		# Delete any posts that have been removed
 		deleted = fs.clean_folders(posts)

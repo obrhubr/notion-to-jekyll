@@ -5,6 +5,7 @@ import re
 import os
 import urllib.request
 from urllib.request import urlretrieve
+from PIL import Image
 
 from notion_to_jekyll import fs
 from notion_to_jekyll import util
@@ -172,8 +173,11 @@ def render_math(markdown_text):
 
 	return has_math, markdown_text
 
-def convert_jpg(short_name, path, filename):
-	from PIL import Image
+def convert_image(short_name, path, filename, extension = "webp"):
+	# Check if image already has desired extension
+	src_extension = filename.split(".")[-1]
+	if src_extension == extension:
+		return path, filename
 
 	# Open image with pillow and convert to rgb
 	im = Image.open(path)
@@ -183,7 +187,7 @@ def convert_jpg(short_name, path, filename):
 	previous_image = path
 
 	# Get new filename
-	filename = ".".join(filename.split(".")[:-1]) + ".jpg"
+	filename = ".".join(filename.split(".")[:-1]) + f".{extension}"
 	path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 
 	# Save image as jpg with 99% quality
@@ -204,7 +208,7 @@ def rename_image_to_hash(short_name, path, filename):
 	).hexdigest()
 
 	# Use it as filename
-	filename = image_hash + ".jpg"
+	filename = image_hash + ".webp"
 	output_path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 	
 	util.logger.debug(f"Renaming image to {output_path}")
@@ -220,7 +224,7 @@ def get_image_name_notion(page_images, image_n):
 
 	return "Image illustrating the blog post."
 
-def format_images(post_id, short_name, markdown_text, encode_jpg, rename_images):
+def format_images(post_id, short_name, markdown_text, encode_images, rename_images, dst_extension):
 	# Set image counter to 0
 	global image_n
 	image_n = 0
@@ -241,8 +245,8 @@ def format_images(post_id, short_name, markdown_text, encode_jpg, rename_images)
 
 		path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 
-		if encode_jpg:
-			path, filename = convert_jpg(short_name, path, filename)
+		if encode_images:
+			path, filename = convert_image(short_name, path, filename, extension=dst_extension)
 
 		if rename_images:
 			path, filename = rename_image_to_hash(short_name, path, filename)
@@ -261,8 +265,8 @@ def format_images(post_id, short_name, markdown_text, encode_jpg, rename_images)
 		return f"![{image_name}](/assets/{short_name}/{filename}){after}"
 
 	util.logger.info("Replacing image tags in markdown with correct paths.")
-	if encode_jpg:
-		util.logger.info("Encode images to jpg.")
+	if encode_images:
+		util.logger.info("Encode images to webp.")
 	if rename_images:
 		util.logger.info("Rename image to it's hash.")
 	
@@ -274,7 +278,7 @@ def format_images(post_id, short_name, markdown_text, encode_jpg, rename_images)
 
 	return markdown_text
 
-def format_page(post_id, post, short_name, publish_time, filename, use_katex, encode_jpg, rename_images):
+def format_page(post_id, post, short_name, publish_time, filename, use_katex, encode_images = True, rename_images = True, dst_extension = "webp"):
 	# Read file
 	markdown_text = ""
 	util.logger.debug("Reading .md file.")
@@ -282,7 +286,7 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 		markdown_text = f.read()
 
 	# Replace MD image tags with correct filename
-	markdown_text = format_images(post_id, short_name, markdown_text, encode_jpg, rename_images)
+	markdown_text = format_images(post_id, short_name, markdown_text, encode_images, rename_images, dst_extension)
 	util.PBAR.update()
 
 	# Ensure correct math rendering with katex
@@ -322,7 +326,7 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 
 	return
 
-def export_page(post_id, post, use_katex, encode_jpg, rename_images):
+def export_page(post_id, post, use_katex, encode_images, rename_images, dst_extension):
 	util.logger.info("Downloading markdown from Notion.")
 	download_markdown(post_id)
 	util.PBAR.update()
@@ -340,7 +344,7 @@ def export_page(post_id, post, use_katex, encode_jpg, rename_images):
 	move_assets(short_name)
 	util.PBAR.update()
 
-	format_page(post_id, post, short_name, publish_time, filename, use_katex, encode_jpg, rename_images)
+	format_page(post_id, post, short_name, publish_time, filename, use_katex, encode_images, rename_images, dst_extension)
 
 	fs.copy_post_to_blog(short_name, publish_time)
 	util.PBAR.update()

@@ -66,14 +66,16 @@ Either call `notion-to-jekyll --help` or see the following table for **optional*
 | Option | Usage |
 |-	|-	|
 | `--download-all` | Download all posts.	|
+| `--download-id` | Download post with specific id.	|
 
 #### Arguments that affect markdown formatting
 
 | Option | Usage |
 |-	|-	|
 | `--use-katex`	| Use Katex formatting for equations.	|
-| `--encode-jpg`	| Encode images as jpgs.	|
 | `--rename-images`	| Rename images to a hash of their content.	|
+| `--encode-images`	| Encode images to different format.	|
+| `--dst-extension`	| The format into which to convert (default "webp").	|
 
 ## Example run
 

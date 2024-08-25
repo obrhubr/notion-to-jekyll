@@ -37,6 +37,35 @@ def get_last_download_time(page):
 		# If it has not been downloaded yet, set time to 0 to force update
 		current_timezone = datetime.now(timezone.utc).astimezone().tzinfo
 		return datetime.fromtimestamp(0, tz=current_timezone)
+	
+def get_post_id(posts, download_id):
+	to_download = []
+	current_posts = fs.get_assets_folders()
+
+	updated = []
+	new = []
+
+	for (post_id, p) in posts:
+		name = p["properties"]["short-name"]["rich_text"][0]["text"]["content"]
+
+		# If this is the post to download, add it to list
+		if post_id == download_id:
+			if not name in current_posts:
+				new += [name]
+				to_download += [(post_id, p)]
+			else:
+				updated += [name]	
+				to_download += [(post_id, p)]
+
+			# Stop iterating through the list
+			break
+			
+	if len(to_download) > 0:
+		logger.info(f"Downloading specific id: {download_id}")
+	else:
+		logger.info(f"Couldn't find post with id: {download_id}")
+
+	return to_download, updated, new
 
 def check_posts(posts, download_all):
 	to_download = []
