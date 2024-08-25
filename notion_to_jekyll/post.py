@@ -292,6 +292,9 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 		has_math, _ = render_math(markdown_text)
 	util.PBAR.update()
 
+	# Get preview image for post
+	previewimage = fetch_previewimage(post, short_name)
+
 	# Set metadata
 	metadata = {
 		"title": f'"{post["properties"]["Name"]["title"][0]["text"]["content"]}"',
@@ -300,7 +303,7 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 		"colortags": format_tags(post),
 		"tags": rss_tags(post),
 		"permalink": short_name,
-		"image": os.path.join(util.ASSETS, short_name, fetch_previewimage(post, short_name)),
+		"image": previewimage,
 		"favicon": fetch_favicon(post, short_name),
 		"excerpt": f'"{richtext_convertor(post["properties"]["Summary"]["rich_text"])}"',
 		"short": check_short(post),
