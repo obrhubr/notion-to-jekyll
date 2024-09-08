@@ -307,7 +307,7 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 		"colortags": format_tags(post),
 		"tags": rss_tags(post),
 		"permalink": short_name,
-		"image": previewimage,
+		"image": os.path.join(util.ASSETS, short_name, previewimage),
 		"favicon": fetch_favicon(post, short_name),
 		"excerpt": f'"{richtext_convertor(post["properties"]["Summary"]["rich_text"])}"',
 		"short": check_short(post),
