@@ -5,12 +5,17 @@ from notion_to_jekyll import util
 
 NOTION_CLIENT = None
 
-def fetch_all_posts(notion_token, db_id):
+def connect(notion_token):
 	global NOTION_CLIENT
 
 	# Connect to notion
 	util.logger.debug("Connecting to Notion...")
 	NOTION_CLIENT = Client(auth=notion_token)
+
+	return
+
+def fetch_all_posts(db_id):
+	global NOTION_CLIENT
 
 	# Fetch blog posts from DB
 	util.logger.debug("Fetching blog posts from Notion...")

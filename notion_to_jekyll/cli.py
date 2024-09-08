@@ -52,7 +52,11 @@ def cli(
 	try:
 		fs.setup_folders()
 
-		posts = notion_api.fetch_all_posts(notion_token, db_id)
+		# Connect to notion
+		notion_api.connect(notion_token)
+
+		# Fetch and filter posts
+		posts = notion_api.fetch_all_posts(db_id)
 		posts = notion_api.filter_posts(posts)
 
 		if download_id:
@@ -63,9 +67,11 @@ def cli(
 		for index, (post_id, p) in enumerate(to_download):
 			name = p["properties"]["short-name"]["rich_text"][0]["text"]["content"]
 
+			# Setup loading bar
 			util.MANAGER = enlighten.get_manager()
 			util.PBAR = util.MANAGER.counter(total=8, desc=f'Exporting post {name}:', unit='steps')
 
+			# Export page to markdown
 			util.logger.info(f"{index+1}/{len(to_download)} - Exporting {name} to Jekyll.")
 			post.export_page(post_id, p, use_katex, encode_images, rename_images, dst_extension)
 
