@@ -58,7 +58,7 @@ def fetch_previewimage(post, short_name):
 
 	# If there is no preview image, return none
 	if len(preview_images) == 0:
-		return "none"
+		return None
 	
 	# add image to meta tags
 	image = preview_images[0]
@@ -296,9 +296,6 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 		has_math, _ = render_math(markdown_text)
 	util.PBAR.update()
 
-	# Get preview image for post
-	previewimage = fetch_previewimage(post, short_name)
-
 	# Set metadata
 	metadata = {
 		"title": f'"{post["properties"]["Name"]["title"][0]["text"]["content"]}"',
@@ -307,13 +304,17 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 		"colortags": format_tags(post),
 		"tags": rss_tags(post),
 		"permalink": short_name,
-		"image": os.path.join(util.ASSETS, short_name, previewimage),
 		"favicon": fetch_favicon(post, short_name),
 		"excerpt": f'"{richtext_convertor(post["properties"]["Summary"]["rich_text"])}"',
 		"short": check_short(post),
 		"sourcecode": get_sourcecode(post),
 		"math": has_math
 	}
+
+	# Get preview image for post
+	previewimage = fetch_previewimage(post, short_name)
+	if previewimage:
+		metadata["image"] = os.path.join(util.ASSETS, short_name, previewimage)
 
 	# insert jekyll metadata
 	markdown_text = add_metadata(markdown_text, metadata)
