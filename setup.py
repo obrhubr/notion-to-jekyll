@@ -27,5 +27,6 @@ setup(
 		"notion-client",
 		"notion2md",
 		"urllib3"
-    ]
+    ],
+	packages=['notion_to_jekyll']
 )
