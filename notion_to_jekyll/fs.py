@@ -1,6 +1,7 @@
 import os
 import shutil
 import zipfile
+import subprocess
 
 from notion_to_jekyll import util
 
@@ -121,5 +122,13 @@ def extract_zip(post_id, short_name):
 def clean_zip(post_id):
 	util.logger.debug("Remove zip file...")
 	os.remove(os.path.join(util.NOTION_FOLDER, post_id + ".zip"))
+
+	return
+
+def strip_exif(short_name):
+	util.logger.debug("Stripping EXIF metadata from images...")
+	images_path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS)
+
+	subprocess.run(['mogrify', '-strip', f'{images_path}/*'], check=True)
 
 	return

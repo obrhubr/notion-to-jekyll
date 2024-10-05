@@ -69,7 +69,7 @@ def cli(
 
 			# Setup loading bar
 			util.MANAGER = enlighten.get_manager()
-			util.PBAR = util.MANAGER.counter(total=8, desc=f'Exporting post {name}:', unit='steps')
+			util.PBAR = util.MANAGER.counter(total=9, desc=f'Exporting post {name}:', unit='steps')
 
 			# Export page to markdown
 			util.logger.info(f"{index+1}/{len(to_download)} - Exporting {name} to Jekyll.")

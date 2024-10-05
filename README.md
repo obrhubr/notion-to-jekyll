@@ -22,6 +22,8 @@ The post will only be published if the `Blog` attribute is set to `Publish`.
 
 ## Install
 
+You need to have `Imagemagick` installed to run this. It's required because of the `mogrify` command which is used to strip the images EXIF metadata.
+
 Download this repository and run
 
 ```bash

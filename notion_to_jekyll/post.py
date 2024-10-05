@@ -347,6 +347,9 @@ def export_page(post_id, post, use_katex, encode_images, rename_images, dst_exte
 
 	format_page(post_id, post, short_name, publish_time, filename, use_katex, encode_images, rename_images, dst_extension)
 
+	fs.strip_exif(short_name)
+	util.PBAR.update()
+
 	fs.copy_post_to_blog(short_name, publish_time)
 	util.PBAR.update()
 
