@@ -128,7 +128,7 @@ def get_sourcecode(post):
 	try:
 		src = post["properties"]["sourcecode"]["rich_text"][0]["plain_text"]
 		return f'"{src}"'
-	except KeyError:
+	except:
 		return ""
 
 def add_metadata(markdown_text, metadata):
