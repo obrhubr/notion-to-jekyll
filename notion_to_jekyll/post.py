@@ -178,6 +178,9 @@ def convert_image(short_name, path, filename, extension = "webp"):
 	src_extension = filename.split(".")[-1]
 	if src_extension == extension:
 		return path, filename
+	
+	if src_extension == "gif":
+		return path, filename
 
 	# Open image with pillow and convert to rgb
 	im = Image.open(path)
@@ -190,7 +193,7 @@ def convert_image(short_name, path, filename, extension = "webp"):
 	filename = ".".join(filename.split(".")[:-1]) + f".{extension}"
 	path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 
-	# Save image as jpg with 99% quality
+	# Save image with 99% quality
 	util.logger.debug(f"Saving encoded image as {path}")
 	rgb_im.save(path, quality=99)
 
@@ -202,13 +205,16 @@ def convert_image(short_name, path, filename, extension = "webp"):
 def rename_image_to_hash(short_name, path, filename):
 	import hashlib
 
+	# Get image extension
+	src_extension = filename.split(".")[-1]
+
 	# Hash image usign MD5
 	image_hash = hashlib.md5(
 		open(path,'rb').read()
 	).hexdigest()
 
 	# Use it as filename
-	filename = image_hash + ".webp"
+	filename = f"{image_hash}.{src_extension}"
 	output_path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 	
 	util.logger.debug(f"Renaming image to {output_path}")
