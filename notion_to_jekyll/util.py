@@ -100,16 +100,16 @@ def check_posts(posts, download_all):
 
 	return to_download, updated, new
 
-# Send logsnag notification if a new post has been added
-def log_new(new, updated, deleted, token):
-	def send_notification(event, description, icon, token):
+# Send logsnag/ntfy notification if a new post has been added
+def log_new(new, updated, deleted, logsnag_config, ntfy_channel):
+	def send_logsnag_notification(event, description, icon, config):
 		# Define the endpoint URL
 		url = 'https://api.logsnag.com/v1/log'
-		token = token
+		token = config["token"]
 
 		data = {
-			'project': 'obrhubr',
-			'channel': 'blog',
+			'project': config["project"],
+			'channel': config["channel"],
 			'event': event,
 			'description': description,
 			'icon': icon,
@@ -122,12 +122,21 @@ def log_new(new, updated, deleted, token):
 		}
 		requests.post(url, json=data, headers=headers)
 		return
+	
+	def send_ntfy_notification(event, description, icon, channel):
+		# Define the endpoint URL
+		url = f'https://ntfy.sh/{channel}'
+		message = f"{icon} {event} - {description}"
+		requests.post(url, data=message)
+		return
 
 	def log_update(event, description, icon):
 		logger.info(f"{icon} {event} - {description}")
 
-		if token:
-			send_notification(event, description, icon, token)
+		if logsnag_config:
+			send_logsnag_notification(event, description, icon, logsnag_config)
+		if ntfy_channel:
+			send_ntfy_notification(event, description, icon, ntfy_channel)
 
 		return
 	

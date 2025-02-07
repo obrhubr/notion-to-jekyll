@@ -11,7 +11,8 @@ from notion_to_jekyll import util
 @click.command()
 @click.option('--notion-token', help="Notion API token.", required=False, type=str)
 @click.option('--db-id', help="Notion DB id.", required=False, type=str)
-@click.option('--log', help="Log updated posts to Logsnag.", is_flag=True, default=False, type=bool)
+@click.option('--logsnag', help="Log updated posts to Logsnag.", is_flag=True, default=False, type=bool)
+@click.option('--ntfy', help="Log updated posts to ntfy.sh.", is_flag=True, default=False, type=bool)
 @click.option('--assets-folder', help="Folder in which to store assets.", required=False, type=str)
 @click.option('--output-folder', help="Folder in which to store the posts.", required=False, type=str)
 @click.option('--download-all', is_flag=True, help="Download all posts.", default=False)
@@ -21,7 +22,7 @@ from notion_to_jekyll import util
 @click.option('--rename-images', is_flag=True, help="Rename images to hash of contents.", default=True, type=bool)
 @click.option('--dst-extension', help="The image extension to convert to.", default="webp", type=str)
 def cli(
-	notion_token, db_id, log, 
+	notion_token, db_id, logsnag, ntfy,
 	assets_folder, output_folder,
 	download_all, download_id,
 	use_katex, encode_images, rename_images, dst_extension # options for export_page
@@ -37,8 +38,14 @@ def cli(
 		notion_token = os.environ["NOTION_TOKEN"]
 		db_id = os.environ["DB_ID"]
 
-	if log:
-		log = os.environ["LOGSNAG_TOKEN"]
+	if logsnag:
+		logsnag = {
+			"token": os.environ["LOGSNAG_TOKEN"],
+			"project": os.environ["LOGSNAG_PROJECT"],
+			"channel": os.environ["LOGSNAG_CHANNEL"]
+		}
+	if ntfy:
+		ntfy = os.environ["NTFY_CHANNEL"]
 
 	# Set dirs
 	if assets_folder:
@@ -79,7 +86,7 @@ def cli(
 		deleted = fs.clean_folders(posts)
 
 		# Log updates to logsnag
-		util.log_new(new, updated, deleted, log)
+		util.log_new(new, updated, deleted, logsnag, ntfy)
 		notion_api.store_last_updated(to_download)
 	except Exception as e:
 		util.logger.error(f"Error occured while exporting posts: {e}...")

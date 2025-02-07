@@ -55,7 +55,8 @@ Either call `notion-to-jekyll --help` or see the following table for **optional*
 #### Arguments to add logging
 | Option | Usage |
 |-	|-	|
-| `--log`	| Log updated posts to Logsnag, expects LOGSNAG_TOKEN env var.	|
+| `--logsnag`	| Log updated posts to Logsnag, expects LOGSNAG_TOKEN, LOGSNAG_PROJECT, LOGSNAG_CHANNEL env var.	|
+| `--ntfy`	| Log updated posts to ntfy, expects NTFY_CHANNEL env var.	|
 
 #### Arguments to add logging
 | Option | Usage |
