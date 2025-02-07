@@ -12,10 +12,14 @@ def copy_post_to_blog(post_name, publish_time):
 
 	try:
 		os.remove(os.path.join(util.POSTS, publish_time + "-" + post_name + ".md"))
+	except:
+		util.logger.error(f"Couldn't remove file {os.path.join(util.POSTS, publish_time + '-' + post_name + '.md')}.")
+		
+	try:
 		# Remove directory in assets
 		shutil.rmtree(os.path.join(util.ASSETS, post_name))
 	except:
-		pass
+		util.logger.error(f"Couldn't remove assets folder {os.path.join(util.ASSETS, post_name)}.")
 
 	# Copy markdown and assets to production folders
 	util.logger.debug("Copy files to assets/ and _posts/ folders...")
