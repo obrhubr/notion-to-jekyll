@@ -60,6 +60,18 @@ def get_images(page_id):
 
 	return image_blocks
 
+def get_audio(page_id):
+	blocks = get_page(page_id)
+
+	# Filter out image blocks
+	audio_blocks = []
+
+	for block in blocks:
+		if block["type"] == "audio":
+			audio_blocks += [block]
+
+	return audio_blocks
+
 def store_last_updated(updated_posts):
 	current_timezone = datetime.now(timezone.utc).astimezone().tzinfo
 	

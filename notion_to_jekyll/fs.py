@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 import shutil
 import zipfile
@@ -131,8 +132,14 @@ def clean_zip(post_id):
 
 def strip_exif(short_name):
 	util.logger.debug("Stripping EXIF metadata from images...")
-	images_path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS)
+	images_path = Path(os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS))
+	image_extensions = {".jpg", ".jpeg", ".png" , ".gif", ".webp", ".bmp"}
 
-	subprocess.run(['mogrify', '-strip', f'{images_path}/*'], check=True)
+	# Get only image files
+	image_files = [str(file) for file in images_path.iterdir() if file.suffix.lower() in image_extensions]
+
+	# Run mogrify only if there are image files
+	if image_files:
+		subprocess.run(['mogrify', '-strip', *image_files], check=True)
 
 	return

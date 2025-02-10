@@ -94,6 +94,26 @@ def fetch_favicon(post, short_name):
 
 	return os.path.join(short_name, "favicon.png")
 
+def fetch_audio(post_id, short_name):
+	# Get audio files
+	audio_blocks = notion_api.get_audio(post_id)
+
+	# Download emoji as png
+	util.logger.info(f"Downloading audio files...")
+
+	filenames = []
+	for idx, block in enumerate(audio_blocks):
+		url = block["audio"]["file"]["url"]
+		filename = f"{idx}.wav"
+		urlretrieve(
+			url,
+			os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
+		)
+
+		filenames += [filename]
+
+	return filenames
+
 def format_tags(post):
 	return str(post["properties"]["Tags"]["multi_select"])
 
@@ -230,6 +250,31 @@ def get_image_name_notion(page_images, image_n):
 
 	return "Image illustrating the blog post."
 
+def format_audio(post_id, short_name, markdown_text):
+	# Get audio from post
+	audio_filenames = fetch_audio(post_id, short_name)
+
+	# Early exit if there are no audio files
+	if len(audio_filenames) == 0:
+		return markdown_text
+
+	def replace_element(match):
+		replacement_text = f'<audio controls src="/assets/{short_name}/{audio_filenames[replace_element.counter]}"></audio>'
+		replace_element.counter += 1
+
+		return replacement_text
+
+	util.logger.info("Fix broken audio tags.")
+
+	replace_element.counter = 0
+	markdown_text = re.sub(
+		r"\[//\]: # \(audio is not supported\)",
+		replace_element,
+		markdown_text
+	)
+
+	return markdown_text
+
 def format_images(post_id, short_name, markdown_text, encode_images, rename_images, dst_extension):
 	# Set image counter to 0
 	global image_n
@@ -293,6 +338,9 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 
 	# Replace MD image tags with correct filename
 	markdown_text = format_images(post_id, short_name, markdown_text, encode_images, rename_images, dst_extension)
+	# Replace audio files with HTML embed
+	markdown_text = format_audio(post_id, short_name, markdown_text)
+
 	util.PBAR.update()
 
 	# Ensure correct math rendering with katex
