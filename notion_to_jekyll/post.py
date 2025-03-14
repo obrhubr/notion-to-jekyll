@@ -234,7 +234,10 @@ def rename_image_to_hash(short_name, path, filename):
 	).hexdigest()
 
 	# Use it as filename
-	filename = f"{image_hash}.{src_extension}"
+	if ".keep." in filename:
+		filename = f"{image_hash}.keep.{src_extension}"
+	else:
+		filename = f"{image_hash}.{src_extension}"
 	output_path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 	
 	util.logger.debug(f"Renaming image to {output_path}")
