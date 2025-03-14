@@ -296,7 +296,8 @@ def format_images(post_id, short_name, markdown_text, encode_images, rename_imag
 
 		path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
 
-		if encode_images:
+		# If the filename has {filename}.keep.{extension} in it's name, keep filetype
+		if encode_images and not ".keep." in filename:
 			path, filename = convert_image(short_name, path, filename, extension=dst_extension)
 
 		if rename_images:

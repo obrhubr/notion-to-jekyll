@@ -2,6 +2,8 @@ import requests
 from datetime import datetime, timezone
 import logging
 import sys
+import re
+import uuid
 
 from notion_to_jekyll import fs
 
@@ -45,8 +47,12 @@ def get_post_id(posts, download_id):
 	updated = []
 	new = []
 
+	all_posts = []
+
 	for (post_id, p) in posts:
 		name = p["properties"]["short-name"]["rich_text"][0]["text"]["content"]
+
+		all_posts += [(name, post_id)]
 
 		# If this is the post to download, add it to list
 		if post_id == download_id:
@@ -64,6 +70,9 @@ def get_post_id(posts, download_id):
 		logger.info(f"Downloading specific id: {download_id}")
 	else:
 		logger.info(f"Couldn't find post with id: {download_id}")
+		# Debug info
+		logger.info(f"All posts: ")
+		logger.info("\n".join([f"{n} - {i}" for n, i in all_posts]))
 
 	return to_download, updated, new
 
@@ -164,3 +173,22 @@ def log_new(new, updated, deleted, logsnag_config, ntfy_channel):
 		)
 
 	return
+
+# https://stackoverflow.com/questions/18986712/creating-a-uuid-from-a-string-with-no-dashes/19399768#19399768
+def format_uuid(hex_string: str) -> str:
+    # Convert to lowercase to match UUID format
+    hex_string = hex_string.lower()
+
+    # Ensure it's a valid 32-character hex string before formatting
+    if not re.fullmatch(r"[0-9a-f]{32}", hex_string):
+        raise ValueError("Invalid UUID string: Must be 32 hexadecimal characters")
+
+    # Insert dashes into the correct UUID format
+    formatted_uuid = re.sub(
+        r"([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})",
+        r"\1-\2-\3-\4-\5",
+        hex_string
+    )
+
+    # Validate by creating a UUID object
+    return str(uuid.UUID(formatted_uuid))

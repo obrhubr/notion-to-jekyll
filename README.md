@@ -80,6 +80,8 @@ Either call `notion-to-jekyll --help` or see the following table for **optional*
 | `--encode-images`	| Encode images to different format.	|
 | `--dst-extension`	| The format into which to convert (default "webp").	|
 
+Note than `--encode-images` only applies the encoding to images that do not have `.keep.` in their filname.
+
 ## Example run
 
 ```

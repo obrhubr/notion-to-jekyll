@@ -67,6 +67,10 @@ def cli(
 		posts = notion_api.filter_posts(posts)
 
 		if download_id:
+			# If it's the id copied from the website, convert to uuidv4
+			if not "-" in download_id:
+				download_id = util.format_uuid(download_id)
+
 			to_download, updated, new = util.get_post_id(posts, download_id)
 		else:
 			to_download, updated, new = util.check_posts(posts, download_all)
