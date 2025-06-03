@@ -16,7 +16,7 @@ def download_markdown(post_id):
 	util.logger.debug("Exporting page from Notion...")
 	MarkdownExporter(
 		block_id=post_id,
-		output_path=os.path.join(util.NOTION_FOLDER), 
+		output_path=os.path.join(util.NOTION_FOLDER),
 		download=True
 	).export()
 
@@ -59,7 +59,7 @@ def fetch_previewimage(post, short_name):
 	# If there is no preview image, return none
 	if len(preview_images) == 0:
 		return None
-	
+
 	# add image to meta tags
 	image = preview_images[0]
 	name = image['name'].split(".")
@@ -79,7 +79,7 @@ def fetch_favicon(post, short_name):
 	# If the post has no emoji icon, return the default
 	if post["icon"]["type"] != "emoji":
 		return "favicon.png"
-	
+
 	# Get emoji name
 	emoji = post['icon']["emoji"]
 	if len(emoji) > 1:
@@ -88,7 +88,7 @@ def fetch_favicon(post, short_name):
 	# Download emoji as png
 	util.logger.info(f"Downloading emoji as favicon: {emoji}")
 	urlretrieve(
-		f"https://emojiapi.dev/api/v1/{hex(ord(emoji))[2:]}/32.png", 
+		f"https://emojiapi.dev/api/v1/{hex(ord(emoji))[2:]}/32.png",
 		os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, "favicon.png")
 	)
 
@@ -119,7 +119,7 @@ def format_tags(post):
 
 def rss_tags(post):
 	tags = []
-	
+
 	for tag in post["properties"]["Tags"]["multi_select"]:
 		tags += [tag["name"]]
 
@@ -132,7 +132,7 @@ def check_short(post):
 	for tag in tags:
 		if tag["name"] == "Short":
 			return True
-	
+
 	return False
 
 # Calculate time to read blog post
@@ -141,13 +141,20 @@ def get_words(text):
 
 	if minutes > 1:
 		return f"{minutes} minutes"
-	
+
 	return f"{minutes} minute"
 
 def get_sourcecode(post):
 	try:
 		src = post["properties"]["sourcecode"]["rich_text"][0]["plain_text"]
 		return f'"{src}"'
+	except:
+		return ""
+
+def get_hn(post):
+	try:
+		hn_link = post["properties"]["hn"]["rich_text"][0]["plain_text"]
+		return f'"{hn_link}"'
 	except:
 		return ""
 
@@ -198,7 +205,7 @@ def convert_image(short_name, path, filename, extension = "webp"):
 	src_extension = filename.split(".")[-1]
 	if src_extension == extension:
 		return path, filename
-	
+
 	if src_extension == "gif":
 		return path, filename
 
@@ -239,7 +246,7 @@ def rename_image_to_hash(short_name, path, filename):
 	else:
 		filename = f"{image_hash}.{src_extension}"
 	output_path = os.path.join(util.NOTION_FOLDER, short_name, util.ASSETS, filename)
-	
+
 	util.logger.debug(f"Renaming image to {output_path}")
 	os.rename(path, output_path)
 
@@ -312,11 +319,11 @@ def format_images(post_id, short_name, markdown_text, encode_images, rename_imag
 		image_n += 1
 
 		util.logger.debug(f"Changing image tag for: ![{image_name}](/assets/{short_name}/{filename})")
-		
+
 		# Check if the text below the image is the caption as output by notion
 		if image_name == caption:
 			return f"![{image_name}](/assets/{short_name}/{filename})"
-		
+
 		return f"![{image_name}](/assets/{short_name}/{filename}){after}"
 
 	util.logger.info("Replacing image tags in markdown with correct paths.")
@@ -324,7 +331,7 @@ def format_images(post_id, short_name, markdown_text, encode_images, rename_imag
 		util.logger.info("Encode images to webp.")
 	if rename_images:
 		util.logger.info("Rename image to it's hash.")
-	
+
 	markdown_text = re.sub(
 		r"\!\[([^\]]+)\]\(([^\)]+)\)(\n\n([^\n]+))?",
 		replace_path,
@@ -366,6 +373,7 @@ def format_page(post_id, post, short_name, publish_time, filename, use_katex, en
 		"excerpt": f'"{richtext_convertor(post["properties"]["Summary"]["rich_text"])}"',
 		"short": check_short(post),
 		"sourcecode": get_sourcecode(post),
+		"hn": get_hn(post),
 		"math": has_math
 	}
 
