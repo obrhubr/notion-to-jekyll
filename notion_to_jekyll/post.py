@@ -6,6 +6,7 @@ import os
 import urllib.request
 from urllib.request import urlretrieve
 from PIL import Image
+import markdown
 
 from notion_to_jekyll import fs
 from notion_to_jekyll import util
@@ -256,7 +257,7 @@ def get_image_name_notion(page_images, image_n):
 	image = page_images[image_n]["image"]
 
 	if image["caption"]:
-		return image["caption"][0]["plain_text"]
+		return richtext_convertor(image["caption"])
 
 	return "Image illustrating the blog post."
 
@@ -322,7 +323,7 @@ def format_images(post_id, short_name, markdown_text, encode_images, rename_imag
 
 		# Check if the text below the image is the caption as output by notion
 		if image_name == caption:
-			return f"![{image_name}](/assets/{short_name}/{filename})"
+			return f"![{markdown.markdown(image_name)}](/assets/{short_name}/{filename})"
 
 		return f"![{image_name}](/assets/{short_name}/{filename}){after}"
 

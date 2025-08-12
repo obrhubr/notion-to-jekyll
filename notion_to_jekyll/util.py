@@ -39,7 +39,7 @@ def get_last_download_time(page):
 		# If it has not been downloaded yet, set time to 0 to force update
 		current_timezone = datetime.now(timezone.utc).astimezone().tzinfo
 		return datetime.fromtimestamp(0, tz=current_timezone)
-	
+
 def get_post_id(posts, download_id):
 	to_download = []
 	current_posts = fs.get_assets_folders()
@@ -60,12 +60,12 @@ def get_post_id(posts, download_id):
 				new += [name]
 				to_download += [(post_id, p)]
 			else:
-				updated += [name]	
+				updated += [name]
 				to_download += [(post_id, p)]
 
 			# Stop iterating through the list
 			break
-			
+
 	if len(to_download) > 0:
 		logger.info(f"Downloading specific id: {download_id}")
 	else:
@@ -131,7 +131,7 @@ def log_new(new, updated, deleted, logsnag_config, ntfy_channel):
 		}
 		requests.post(url, json=data, headers=headers)
 		return
-	
+
 	def send_ntfy_notification(event, description, icon, channel):
 		# Define the endpoint URL
 		url = f'https://ntfy.sh/{channel}'
@@ -148,7 +148,7 @@ def log_new(new, updated, deleted, logsnag_config, ntfy_channel):
 			send_ntfy_notification(event, description, icon, ntfy_channel)
 
 		return
-	
+
 	logger.info("Finished exporting posts from Notion to Jekyll.")
 
 	for post in new:
