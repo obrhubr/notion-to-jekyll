@@ -26,7 +26,8 @@ setup(
 		"enlighten",
 		"notion-client",
 		"notion2md",
-		"urllib3"
+		"urllib3",
+		"markdown"
     ],
 	packages=['notion_to_jekyll']
 )
